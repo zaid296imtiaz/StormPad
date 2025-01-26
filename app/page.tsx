@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { v4 as uuidv4 } from "uuid";
+
 export default function Home() {
   const [name, setName] = useState("");
   const [documentId, setDocumentId] = useState("");
@@ -25,7 +27,18 @@ export default function Home() {
     }
 
     // Use router.push with { replace: true } to prevent going back to this page
-    router.replace(`/editor/${documentId}?name=${encodeURIComponent(name)}`);
+    // router.replace(`/editor/${documentId}?name=${encodeURIComponent(name)}`);
+
+    if (action === "new") {
+      const newId = uuidv4();
+      router.push(`/editor/${newId}`);
+    } else if (action === "connect") {
+      if (!documentId.trim()) {
+        alert("Please enter a Document ID to connect.");
+        return;
+      }
+      router.push(`/editor/${documentId}`);
+    }
   };
 
   return (

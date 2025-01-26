@@ -1,27 +1,40 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent } from "@/components/ui/card"
-import { ArrowLeft, Copy, Users } from "lucide-react"
+import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowLeft, Copy, Users } from "lucide-react";
 
-export default function Editor({ params }: { params: { documentId: string } }) {
-  const [documentName, setDocumentName] = useState("Untitled Document")
-  const [content, setContent] = useState("")
-  const [connectedUsers, setConnectedUsers] = useState(["You"])
-  const router = useRouter()
+import CollaborativeEditor from "@/components/CollaborativeEditor";
+
+export default function Editor({ params }: { params: { documentid: string } }) {
+  const router = useRouter();
+  const [documentName, setDocumentName] = useState("Untitled Document");
+  const [content, setContent] = useState("");
+  const [connectedUsers, setConnectedUsers] = useState(["You"]);
+  const [sessionURL, setSessionURL] = useState("");
+
+  const unwrappedParams = React.use(params);
+  const documentId = unwrappedParams.documentid;
+
+//   console.log(`doc id: ${documentId} && ${JSON.stringify(params)}`)
 
   useEffect(() => {
-    // Here you would set up your real-time connection
-    // and sync the document content
-  }, [])
+    if (documentId) {
+      setSessionURL(window.location.href);
+    }
+  }, [documentId]);
 
   const copySessionId = () => {
-    navigator.clipboard.writeText(params.documentId)
-    alert("Session ID copied to clipboard!")
+    navigator.clipboard.writeText(sessionURL);
+    alert("Session ID copied to clipboard!");
+  };
+
+  if (!documentId) {
+    return <div>Loading...</div>;
   }
 
   return (
@@ -29,7 +42,11 @@ export default function Editor({ params }: { params: { documentId: string } }) {
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
           <div className="flex items-center space-x-4 w-full sm:w-auto">
-            <Button variant="ghost" onClick={() => router.push("/")} className="p-0">
+            <Button
+              variant="ghost"
+              onClick={() => router.push("/")}
+              className="p-0"
+            >
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <Input
@@ -39,7 +56,9 @@ export default function Editor({ params }: { params: { documentId: string } }) {
             />
           </div>
           <div className="flex items-center space-x-2 w-full sm:w-auto justify-end">
-            <span className="text-sm text-gray-500">Session ID: {params.documentId}</span>
+            <span className="text-sm text-gray-500">
+              Session ID: {unwrappedParams.documentid}
+            </span>
             <Button variant="ghost" onClick={copySessionId} className="p-1">
               <Copy className="h-4 w-4" />
             </Button>
@@ -50,12 +69,7 @@ export default function Editor({ params }: { params: { documentId: string } }) {
       <main className="flex-grow flex flex-col sm:flex-row">
         <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row">
           <div className="flex-grow mb-4 sm:mb-0 sm:mr-4">
-            <Textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="w-full h-full min-h-[300px] sm:min-h-[500px] p-4 text-lg"
-              placeholder="Start typing your document here..."
-            />
+            <CollaborativeEditor roomId={documentId} />
           </div>
           <Card className="w-full sm:w-64 h-fit">
             <CardContent>
@@ -75,6 +89,5 @@ export default function Editor({ params }: { params: { documentId: string } }) {
         </div>
       </main>
     </div>
-  )
+  );
 }
-
