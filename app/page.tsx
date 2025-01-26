@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { v4 as uuidv4 } from "uuid";
+import { toast } from "react-toastify";
 
 export default function Home() {
   const [name, setName] = useState("");
@@ -21,23 +22,21 @@ export default function Home() {
   const router = useRouter();
 
   const handleSubmit = (action: "new" | "connect") => {
-    if (!name || !documentId) {
-      alert("Please fill in all fields");
+    if (!name) {
+      toast.warning("Please enter your name");
       return;
     }
 
-    // Use router.push with { replace: true } to prevent going back to this page
-    // router.replace(`/editor/${documentId}?name=${encodeURIComponent(name)}`);
+    if (action === "connect" && !documentId.trim()) {
+      toast.warning("Please enter a Document ID to connect");
+      return;
+    }
 
     if (action === "new") {
       const newId = uuidv4();
-      router.push(`/editor/${newId}`);
+      router.push(`/editor/${newId}?name=${encodeURIComponent(name)}`);
     } else if (action === "connect") {
-      if (!documentId.trim()) {
-        alert("Please enter a Document ID to connect.");
-        return;
-      }
-      router.push(`/editor/${documentId}`);
+      router.push(`/editor/${documentId}?name=${encodeURIComponent(name)}`);
     }
   };
 
@@ -46,7 +45,7 @@ export default function Home() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl sm:text-3xl">
-            Welcome to CollabEdit
+            Welcome to StormPad
           </CardTitle>
           <CardDescription>Enter your details to start editing</CardDescription>
         </CardHeader>

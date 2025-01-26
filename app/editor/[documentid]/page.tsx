@@ -1,36 +1,82 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Copy, Users } from "lucide-react";
+import { toast } from "react-toastify";
 
 import CollaborativeEditor from "@/components/CollaborativeEditor";
 
+import { getYDoc, getProvider } from "@/lib/yjs";
+
 export default function Editor({ params }: { params: { documentid: string } }) {
   const router = useRouter();
+  const searchParam = useSearchParams();
   const [documentName, setDocumentName] = useState("Untitled Document");
   const [content, setContent] = useState("");
-  const [connectedUsers, setConnectedUsers] = useState(["You"]);
+  const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
   const [sessionURL, setSessionURL] = useState("");
+
+  const [userName, setUserName] = useState("");
 
   const unwrappedParams = React.use(params);
   const documentId = unwrappedParams.documentid;
 
-//   console.log(`doc id: ${documentId} && ${JSON.stringify(params)}`)
+  //   console.log(`doc id: ${documentId} && ${JSON.stringify(params)}`)
+
+  const handleUsersChange = useCallback((users: string[]) => {
+    //no duplicates and inclide 'You' for self user
+    const uniqueUsers = Array.from(new Set(users));
+
+    if (!uniqueUsers.includes(userName)) {
+      uniqueUsers.unshift(userName);
+    }
+    setConnectedUsers(uniqueUsers);
+  }, []);
 
   useEffect(() => {
     if (documentId) {
       setSessionURL(window.location.href);
+      setUserName(searchParam.get("name") || "User");
+
+      const ydoc = getYDoc(documentId);
+      const provider = getProvider(documentId);
+
+      const metadata = ydoc.getMap("metadata");
+
+      if (!metadata.has("documentName")) {
+        metadata.set("documentName", "Untitled Document");
+      }
+
+      const updateDocumentName = () => {
+        const name = metadata.get("documentName") as string;
+        setDocumentName(name);
+      };
+
+      updateDocumentName();
+
+      metadata.observe(() => {
+        updateDocumentName();
+      });
     }
   }, [documentId]);
 
   const copySessionId = () => {
-    navigator.clipboard.writeText(sessionURL);
-    alert("Session ID copied to clipboard!");
+    navigator.clipboard.writeText(documentId);
+    toast.success("Document ID copied to clipboard!");
+  };
+
+  const handleDocumentNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newName = e.target.value;
+    setDocumentName(newName);
+
+    const ydoc = getYDoc(documentId);
+    const metadata = ydoc.getMap("metadata");
+    metadata.set("documentName", newName);
   };
 
   if (!documentId) {
@@ -51,7 +97,7 @@ export default function Editor({ params }: { params: { documentid: string } }) {
             </Button>
             <Input
               value={documentName}
-              onChange={(e) => setDocumentName(e.target.value)}
+              onChange={handleDocumentNameChange}
               className="text-xl sm:text-2xl font-bold border-none focus:ring-0 p-0 w-full sm:w-auto"
             />
           </div>
@@ -69,18 +115,24 @@ export default function Editor({ params }: { params: { documentid: string } }) {
       <main className="flex-grow flex flex-col sm:flex-row">
         <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row">
           <div className="flex-grow mb-4 sm:mb-0 sm:mr-4">
-            <CollaborativeEditor roomId={documentId} />
+            <CollaborativeEditor
+              roomId={documentId}
+              onUsersChange={handleUsersChange}
+              userName={userName}
+            />
           </div>
           <Card className="w-full sm:w-64 h-fit">
             <CardContent>
-              <div className="flex items-center space-x-2 mb-4">
+              <div className="flex items-center space-x-2 mb-4 pt-3">
                 <Users className="h-5 w-5 text-gray-500" />
                 <h3 className="text-lg font-semibold">Connected Users</h3>
               </div>
               <ul className="space-y-2">
                 {connectedUsers.map((user, index) => (
                   <li key={index} className="text-sm text-gray-600">
-                    {user}
+                    {user === userName
+                      ? "You"
+                      : user.charAt(0).toUpperCase() + user.slice(1)}
                   </li>
                 ))}
               </ul>

@@ -10,10 +10,14 @@ import "quill/dist/quill.snow.css";
 
 interface CollaborativeEditorProps {
   roomId?: string;
+  userName: string;
+  onUsersChange: (users: string[]) => void;
 }
 
 const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
   roomId = "",
+  userName,
+  onUsersChange,
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -29,31 +33,43 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
     const quill = new Quill(editorRef.current, {
       theme: "snow",
       modules: {
-        toolbar: [
-          [{ header: [1, 2, 3, false] }],
-          ["bold", "italic", "underline"],
-          ["image", "code-block"],
-        ],
+        toolbar: false,
       },
-      placeholder: "Start typing your document here...",
+      placeholder: "Whats on your mind?",
     });
 
     const yText = ydoc.getText("quill");
 
     const binding = new QuillBinding(yText, quill, provider.awareness);
 
+    // user's self state
+    provider.awareness.setLocalStateField("user", {
+      name: userName,
+    });
+
+    // extract users
+    const updateUsers = () => {
+      const states = Array.from(provider.awareness.getStates().values());
+
+      const users = states
+        .map((state) => state.user?.name)
+        .filter((name) => typeof name === "string");
+
+      onUsersChange(users);
+    };
+
+    updateUsers();
+
+    provider.awareness.on("change", updateUsers);
+
     return () => {
+      provider.awareness.off("change", updateUsers);
       provider.disconnect();
       ydoc.destroy();
     };
-  }, [roomId]);
+  }, [roomId, userName, onUsersChange]);
 
-  return (
-    <div
-      ref={editorRef}
-      style={{ height: "500px", width: "100%" }} 
-    ></div>
-  );
+  return <div ref={editorRef} style={{ height: "500px", width: "100%" }}></div>;
 };
 
 export default CollaborativeEditor;
