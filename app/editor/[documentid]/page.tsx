@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Copy, Users } from "lucide-react";
 import { toast } from "react-toastify";
@@ -17,9 +16,9 @@ export default function Editor({ params }: { params: { documentid: string } }) {
   const router = useRouter();
   const searchParam = useSearchParams();
   const [documentName, setDocumentName] = useState("Untitled Document");
-  const [content, setContent] = useState("");
+  // const [content, setContent] = useState("");
   const [connectedUsers, setConnectedUsers] = useState<string[]>([]);
-  const [sessionURL, setSessionURL] = useState("");
+  // const [sessionURL, setSessionURL] = useState("");
 
   const [userName, setUserName] = useState("");
 
@@ -40,11 +39,11 @@ export default function Editor({ params }: { params: { documentid: string } }) {
 
   useEffect(() => {
     if (documentId) {
-      setSessionURL(window.location.href);
+      // setSessionURL(window.location.href);
       setUserName(searchParam.get("name") || "User");
 
       const ydoc = getYDoc(documentId);
-      const provider = getProvider(documentId);
+      // const provider = getProvider(documentId);
 
       const metadata = ydoc.getMap("metadata");
 

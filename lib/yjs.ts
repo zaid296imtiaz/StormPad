@@ -8,10 +8,12 @@ interface YjsState {
 
 const ydocs: { [room: string]: YjsState } = {};
 
+const websocketURL = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:1234';
+
 export const getYDoc = (room: string) => {
   if (!ydocs[room]) {
     const ydoc = new Y.Doc();
-    const provider = new WebsocketProvider("ws://localhost:1234", room, ydoc);
+    const provider = new WebsocketProvider(websocketURL, room, ydoc);
     ydocs[room] = { ydoc, provider };
   }
   return ydocs[room].ydoc;
@@ -20,7 +22,7 @@ export const getYDoc = (room: string) => {
 export const getProvider = (room: string) => {
   if (!ydocs[room]) {
     const ydoc = new Y.Doc();
-    const provider = new WebsocketProvider("ws://localhost:1234", room, ydoc);
+    const provider = new WebsocketProvider(websocketURL, room, ydoc);
     ydocs[room] = { ydoc, provider };
   }
   return ydocs[room].provider;

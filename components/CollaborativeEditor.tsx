@@ -5,7 +5,6 @@ import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 import Quill from "quill";
 import { QuillBinding } from "y-quill";
-import { Textarea } from "./ui/textarea";
 import "quill/dist/quill.snow.css";
 
 interface CollaborativeEditorProps {
@@ -21,14 +20,13 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
 
-  const [content, setContent] = useState("");
-
   useEffect(() => {
     if (!editorRef.current) return;
 
     const ydoc = new Y.Doc();
 
-    const provider = new WebsocketProvider("ws://localhost:1234", roomId, ydoc);
+    const websocketURL = process.env.NEXT_PUBLIC_WEBSOCKET_URL || 'ws://localhost:1234';
+    const provider = new WebsocketProvider(websocketURL, roomId, ydoc);
 
     const quill = new Quill(editorRef.current, {
       theme: "snow",
@@ -40,7 +38,7 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
 
     const yText = ydoc.getText("quill");
 
-    const binding = new QuillBinding(yText, quill, provider.awareness);
+    new QuillBinding(yText, quill, provider.awareness);
 
     // user's self state
     provider.awareness.setLocalStateField("user", {
