@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 
 import CollaborativeEditor from "@/components/CollaborativeEditor";
 
-import { getYDoc, getProvider } from "@/lib/yjs";
+import { getYDoc } from "@/lib/yjs";
 
 export default function Editor({ params }: { params: { documentid: string } }) {
   const router = useRouter();
