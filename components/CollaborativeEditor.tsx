@@ -69,7 +69,7 @@ const CollaborativeEditor: React.FC<CollaborativeEditorProps> = ({
     };
   }, [roomId, userName, onUsersChange]);
 
-  return <div ref={editorRef} style={{ height: "500px", width: "100%" }}></div>;
+  return <div ref={editorRef} style={{ height: "100%", width: "100%", borderRadius: '7px' }}></div>;
 };
 
 export default CollaborativeEditor;

@@ -114,7 +114,7 @@ export default function Editor({ params }: { params: { documentid: string } }) {
 
       <main className="flex-grow flex flex-col sm:flex-row">
         <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row">
-          <div className="flex-grow mb-4 sm:mb-0 sm:mr-4">
+          <div className="flex-grow mb-4 sm:mb-0 sm:mr-4 bg-white rounded-md">
             <CollaborativeEditor
               roomId={documentId}
               onUsersChange={handleUsersChange}
@@ -125,7 +125,7 @@ export default function Editor({ params }: { params: { documentid: string } }) {
             <CardContent>
               <div className="flex items-center space-x-2 mb-4 pt-3">
                 <Users className="h-5 w-5 text-gray-500" />
-                <h3 className="text-lg font-semibold">Connected Users</h3>
+                <h3 className="text-lg font-semibold">Online</h3>
               </div>
               <ul className="space-y-2">
                 {connectedUsers.map((user, index) => (
